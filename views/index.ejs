@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Notes App</title>
+  <link rel="stylesheet" href="/styles/style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="panel panel-form">
+      <h1>Book Notes App</h1>
+      <form action="/add-book" method="POST" class="card form-card">
+        <h2>Add a New Book</h2>
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required />
+
+        <label for="author">Author</label>
+        <input type="text" id="author" name="author" required />
+
+        <label for="isbn">ISBN</label>
+        <input type="text" id="isbn" name="isbn" placeholder="Required" required />
+
+        <label for="recommend">Rating</label>
+        <input type="number" id="recommend" name="recommend" min="0" max="10" value="0" />
+
+        <label for="date_read">Date Read</label>
+        <input type="date" id="date_read" name="date_read" />
+
+        <label for="about">Notes about the book</label>
+        <textarea id="about" name="about" rows="3" placeholder="Add a short summary or thoughts"></textarea>
+
+        <button type="submit">Add Book</button>
+      </form>
+    </section>
+
+    <section class="panel panel-list">
+      <h2>My Books</h2>
+      <% if (books.length === 0) { %>
+        <p class="empty-state">No books yet. Add one to start taking notes.</p>
+      <% } %>
+
+      <ul class="book-list">
+        <% books.forEach((book) => { %>
+          <li class="book-card">
+            <div class="book-header">
+              <div>
+                <h3><%= book.title %></h3>
+                <p class="meta">by <%= book.author %></p>
+              </div>
+              <form action="/delete-book/<%= book.id %>" method="POST">
+                <button class="text-button" type="submit">Delete</button>
+              </form>
+            </div>
+
+            <div class="cover-container">
+              <img src="<%= book.cover_url || 'https://via.placeholder.com/160x240?text=No+Cover' %>" alt="Cover for <%= book.title %>" />
+            </div>
+
+            <div class="book-meta">
+              <span>Rating: <%= book.recommend %>/10</span>
+              <% if (book.date_read) { %>
+                <span>Read: <%= new Date(book.date_read).toLocaleDateString() %></span>
+              <% } %>
+            </div>
+
+            <% if (book.about) { %>
+              <p class="book-about"><%= book.about %></p>
+            <% } %>
+
+            <div class="notes-section">
+              <h4>Notes</h4>
+              <% const notes = notesByBook[book.id] || []; %>
+              <% if (notes.length === 0) { %>
+                <p class="empty-state">No notes yet for this book.</p>
+              <% } else { %>
+                <ul class="notes-list">
+                  <% notes.forEach((note) => { %>
+                    <li>
+                      <span><%= note.content %></span>
+                      <form action="/delete-note/<%= note.id %>" method="POST">
+                        <button class="text-button" type="submit">Remove</button>
+                      </form>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </div>
+
+            <form action="/add-note/<%= book.id %>" method="POST" class="note-form">
+              <label for="note-<%= book.id %>">Add a note</label>
+              <textarea id="note-<%= book.id %>" name="content" rows="2" placeholder="Write a thought or quote..."></textarea>
+              <button type="submit">Add Note</button>
+            </form>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
