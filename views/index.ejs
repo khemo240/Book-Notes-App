@@ -41,6 +41,7 @@
           <span>Sort by</span>
           <a href="/?sort=recent" class="sort-link <%= sort === 'recent' ? 'active' : '' %>">Recent</a>
           <a href="/?sort=rating" class="sort-link <%= sort === 'rating' ? 'active' : '' %>">Rating</a>
+          <a href="/?sort=title" class="sort-link <%= sort === 'title' ? 'active' : '' %>">Title</a>
         </div>
       </div>
 
@@ -56,9 +57,12 @@
                 <h3><%= book.title %></h3>
                 <p class="meta">by <%= book.author %></p>
               </div>
-              <form action="/delete-book/<%= book.id %>" method="POST">
-                <button class="text-button" type="submit">Delete</button>
-              </form>
+              <div class="action-buttons">
+                <a class="text-button" href="/edit-book/<%= book.id %>">Edit</a>
+                <form action="/delete-book/<%= book.id %>" method="POST">
+                  <button class="text-button" type="submit">Delete</button>
+                </form>
+              </div>
             </div>
 
             <div class="cover-container">

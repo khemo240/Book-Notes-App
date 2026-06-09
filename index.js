@@ -121,6 +121,8 @@ app.get("/", async (req, res) => {
 
     if (sort === "rating") {
       orderBy = "recommend DESC, id DESC";
+    } else if (sort === "title") {
+      orderBy = "LOWER(title) ASC, id DESC";
     } else if (sort === "recent") {
       orderBy = "id DESC";
     }
@@ -143,6 +145,45 @@ app.get("/", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error occurred while fetching books and notes");
+  }
+});
+
+app.get("/edit-book/:id", async (req, res) => {
+  try {
+    const bookResult = await db.query("SELECT * FROM books WHERE id = $1", [req.params.id]);
+    if (bookResult.rows.length === 0) {
+      return res.status(404).send("Book not found");
+    }
+
+    res.render("edit.ejs", { book: bookResult.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error occurred while loading book edit form");
+  }
+});
+
+app.post("/edit-book/:id", async (req, res) => {
+  try {
+    const { title, author, isbn, recommend, date_read, about } = req.body;
+    const trimmedIsbn = String(isbn || "").trim();
+    if (!trimmedIsbn) {
+      return res.status(400).send("ISBN is required.");
+    }
+
+    const openLibraryData = await fetchOpenLibraryBookData({ isbn: trimmedIsbn, title });
+    const coverUrl = openLibraryData.cover_url || "";
+    const bookTitle = title || openLibraryData.title || "Unknown Title";
+    const bookAuthor = author || openLibraryData.author || "Unknown Author";
+
+    await db.query(
+      "UPDATE books SET title = $1, author = $2, isbn = $3, recommend = $4, date_read = $5, about = $6, cover_url = $7 WHERE id = $8",
+      [bookTitle, bookAuthor, trimmedIsbn, parseInt(recommend, 10) || 0, date_read || null, about || "", coverUrl, req.params.id]
+    );
+
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error occurred while updating book");
   }
 });
 
