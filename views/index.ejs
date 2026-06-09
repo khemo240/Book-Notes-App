@@ -35,7 +35,15 @@
     </section>
 
     <section class="panel panel-list">
-      <h2>My Books</h2>
+      <div class="list-header">
+        <h2>My Books</h2>
+        <div class="sort-controls">
+          <span>Sort by</span>
+          <a href="/?sort=recent" class="sort-link <%= sort === 'recent' ? 'active' : '' %>">Recent</a>
+          <a href="/?sort=rating" class="sort-link <%= sort === 'rating' ? 'active' : '' %>">Rating</a>
+        </div>
+      </div>
+
       <% if (books.length === 0) { %>
         <p class="empty-state">No books yet. Add one to start taking notes.</p>
       <% } %>

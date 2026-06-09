@@ -116,7 +116,16 @@ async function fetchOpenLibraryBookData({ isbn, title } = {}) {
 
 app.get("/", async (req, res) => {
   try {
-    const booksResult = await db.query("SELECT * FROM books ORDER BY id DESC");
+    const { sort } = req.query;
+    let orderBy = "id DESC";
+
+    if (sort === "rating") {
+      orderBy = "recommend DESC, id DESC";
+    } else if (sort === "recent") {
+      orderBy = "id DESC";
+    }
+
+    const booksResult = await db.query(`SELECT * FROM books ORDER BY ${orderBy}`);
     const notesResult = await db.query("SELECT * FROM notes ORDER BY created_at DESC");
     const notesByBook = {};
     notesResult.rows.forEach((note) => {
@@ -129,6 +138,7 @@ app.get("/", async (req, res) => {
     res.render("index.ejs", {
       books: booksResult.rows,
       notesByBook,
+      sort: sort || "recent",
     });
   } catch (err) {
     console.error(err);
